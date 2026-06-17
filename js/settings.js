@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    settings.js
    Admin / Settings panel, localStorage persistence, and the
    Bot API "Test Connection" (getMe) feature for Gold Miner.
@@ -148,8 +148,8 @@
 
   function maskToken(token) {
     if (!token) return '(empty)';
-    if (token.length <= 8) return '••••';
-    return token.slice(0, 4) + '••••••' + token.slice(-4);
+    if (token.length <= 8) return 'â€¢â€¢â€¢â€¢';
+    return token.slice(0, 4) + 'â€¢â€¢â€¢â€¢â€¢â€¢' + token.slice(-4);
   }
 
   /* ----------------------------------------------------------------
@@ -205,7 +205,7 @@
 
     if (d.cfgMult) {
       d.cfgMult.addEventListener('input', function () {
-        d.cfgMultVal.textContent = parseFloat(d.cfgMult.value).toFixed(1) + '×';
+        d.cfgMultVal.textContent = parseFloat(d.cfgMult.value).toFixed(1) + 'Ã—';
       });
     }
 
@@ -232,7 +232,7 @@
     if (d.adminId)     d.adminId.value     = c.adminId;
 
     if (d.cfgTime)   { d.cfgTime.value = c.startTime; d.cfgTimeVal.textContent = c.startTime + 's'; }
-    if (d.cfgMult)   { d.cfgMult.value = c.scoreMult; d.cfgMultVal.textContent = c.scoreMult.toFixed(1) + '×'; }
+    if (d.cfgMult)   { d.cfgMult.value = c.scoreMult; d.cfgMultVal.textContent = c.scoreMult.toFixed(1) + 'Ã—'; }
     if (d.cfgDiff)   d.cfgDiff.value = c.difficulty;
     if (d.cfgSound)  d.cfgSound.checked = c.sound;
   }
@@ -326,7 +326,7 @@
 
     var btn = state.dom.btnTest;
     var prevText = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = 'Testing…'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Testingâ€¦'; }
 
     var url = 'https://api.telegram.org/bot' + encodeURIComponent(token) + '/getMe';
 
@@ -335,7 +335,7 @@
       .then(function (data) {
         if (data && data.ok && data.result) {
           var u = data.result.username ? '@' + data.result.username : '(no username)';
-          log.success('Connection OK — bot: ' + (data.result.first_name || '') + ' ' + u);
+          log.success('Connection OK â€” bot: ' + (data.result.first_name || '') + ' ' + u);
           // Auto-fill username if the field was empty
           if (!state.config.botUsername && data.result.username) {
             state.config.botUsername = data.result.username;
@@ -367,7 +367,7 @@
   ---------------------------------------------------------------- */
   function init() {
     cacheDom();
-    state.config = load();
+    state.config = load(); if(!$c || !$c.difficulty){ state.config = DEFAULTS; }
     bindEvents();
     renderForm();
     log.info('Settings module initialized. Difficulty: ' + state.config.difficulty);
@@ -394,3 +394,4 @@
   };
 
 })(window);
+
