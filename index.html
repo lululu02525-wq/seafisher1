@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
+  <meta name="theme-color" content="#1b1b2f" />
+  <title>Gold Miner</title>
+
+  <!-- Telegram Web App SDK (must load first) -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ============================================================= -->
+  <!-- ROOT APP CONTAINER                                            -->
+  <!-- ============================================================= -->
+  <div id="app">
+
+    <!-- ===== TOP HUD ===== -->
+    <header id="hud" class="hud">
+      <div class="hud-left">
+        <div class="hud-item">
+          <span class="hud-label">SCORE</span>
+          <span id="hudScore" class="hud-value">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">TARGET</span>
+          <span id="hudTarget" class="hud-value">0</span>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div class="hud-item">
+          <span class="hud-label">LEVEL</span>
+          <span id="hudLevel" class="hud-value">1</span>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <div class="hud-item">
+          <span class="hud-label">TIME</span>
+          <span id="hudTime" class="hud-value">60</span>
+        </div>
+        <button id="btnSettings" class="icon-btn" aria-label="Settings" title="Settings">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- ===== GAME CANVAS ===== -->
+    <main id="stage" class="stage">
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- Fire button (mobile-friendly) -->
+      <button id="btnFire" class="fire-btn" aria-label="Fire hook">
+        FIRE
+      </button>
+    </main>
+
+    <!-- ============================================================= -->
+    <!-- OVERLAYS                                                      -->
+    <!-- ============================================================= -->
+
+    <!-- ===== START / MENU OVERLAY ===== -->
+    <div id="overlayMenu" class="overlay overlay--visible">
+      <div class="panel">
+        <h1 class="title">🪙 Gold Miner</h1>
+        <p class="subtitle">Swing the claw, grab the gold, beat the clock!</p>
+        <button id="btnStart" class="btn btn--primary btn--lg">▶ Play</button>
+        <button id="btnHowTo" class="btn btn--ghost">How to play</button>
+        <p class="best-line">Best score: <span id="bestScore">0</span></p>
+      </div>
+    </div>
+
+    <!-- ===== HOW-TO OVERLAY ===== -->
+    <div id="overlayHowTo" class="overlay">
+      <div class="panel">
+        <h2 class="title title--sm">How to play</h2>
+        <ul class="howto-list">
+          <li>Tap the screen or <b>FIRE</b> to launch the swinging hook.</li>
+          <li>Grab <b>gold</b> 🪙 and <b>diamonds</b> 💎 for big points.</li>
+          <li><b>Rocks</b> 🪨 are heavy and slow — they waste time.</li>
+          <li>Watch out for <b>TNT</b> 🧨 and grab <b>bags</b> 🎁 for surprises.</li>
+          <li>Reach the <b>TARGET</b> before <b>TIME</b> runs out.</li>
+        </ul>
+        <button id="btnHowToClose" class="btn btn--primary">Got it</button>
+      </div>
+    </div>
+
+    <!-- ===== SHOP (between levels) ===== -->
+    <div id="overlayShop" class="overlay">
+      <div class="panel">
+        <h2 class="title title--sm">🛒 Shop</h2>
+        <p class="subtitle">Spend your score on upgrades for the next level.</p>
+        <p class="shop-balance">Balance: <span id="shopBalance">0</span></p>
+
+        <div class="shop-grid" id="shopGrid">
+          <!-- Items injected by game.js -->
+        </div>
+
+        <button id="btnNextLevel" class="btn btn--primary btn--lg">
+          Next Level ▶
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== LEVEL COMPLETE ===== -->
+    <div id="overlayLevelDone" class="overlay">
+      <div class="panel">
+        <h2 class="title title--sm">✅ Level Cleared!</h2>
+        <p class="subtitle">
+          You reached <span id="levelDoneScore">0</span> points.
+        </p>
+        <button id="btnGoShop" class="btn btn--primary btn--lg">
+          Continue to Shop 🛒
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== GAME OVER ===== -->
+    <div id="overlayGameOver" class="overlay">
+      <div class="panel">
+        <h2 class="title title--sm">⏱️ Time's Up!</h2>
+        <p class="subtitle">
+          Final score: <span id="finalScore">0</span>
+        </p>
+        <p class="subtitle subtitle--dim">
+          You needed <span id="neededScore">0</span> to advance.
+        </p>
+        <button id="btnSendScore" class="btn btn--primary btn--lg">
+          📤 Send Score to Bot
+        </button>
+        <button id="btnRestart" class="btn btn--ghost">🔄 Play Again</button>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- SETTINGS / ADMIN PANEL                                        -->
+    <!-- ============================================================= -->
+    <div id="overlaySettings" class="overlay overlay--settings">
+      <div class="panel panel--wide">
+        <div class="panel-head">
+          <h2 class="title title--sm">⚙️ Settings &amp; Admin</h2>
+          <button id="btnSettingsClose" class="icon-btn" aria-label="Close">✖</button>
+        </div>
+
+        <div class="settings-scroll">
+          <!-- Telegram / Bot section -->
+          <fieldset class="fieldset">
+            <legend>Telegram Bot</legend>
+
+            <label class="field">
+              <span class="field-label">Bot Token</span>
+              <div class="field-row">
+                <input id="setBotToken" type="password" class="input"
+                       placeholder="123456:ABC-DEF..." autocomplete="off" />
+                <button id="btnToggleToken" class="icon-btn sm" title="Show/Hide">👁️</button>
+              </div>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Bot Username</span>
+              <input id="setBotUsername" type="text" class="input"
+                     placeholder="@MyGoldMinerBot" autocomplete="off" />
+            </label>
+
+            <label class="field">
+              <span class="field-label">Web App URL</span>
+              <input id="setWebAppUrl" type="url" class="input"
+                     placeholder="https://user.github.io/gold-miner/" />
+            </label>
+
+            <label class="field">
+              <span class="field-label">Admin Chat ID</span>
+              <input id="setAdminId" type="text" class="input"
+                     placeholder="123456789" inputmode="numeric" />
+            </label>
+
+            <button id="btnTestConn" class="btn btn--accent">
+              🔌 Test Connection (getMe)
+            </button>
+          </fieldset>
+
+          <!-- Game config section -->
+          <fieldset class="fieldset">
+            <legend>Game Configuration</legend>
+
+            <label class="field">
+              <span class="field-label">
+                Start Time (sec): <b id="cfgTimeVal">60</b>
+              </span>
+              <input id="cfgTime" type="range" min="20" max="120" step="5"
+                     value="60" class="range" />
+            </label>
+
+            <label class="field">
+              <span class="field-label">
+                Score Multiplier: <b id="cfgMultVal">1.0</b>×
+              </span>
+              <input id="cfgMult" type="range" min="0.5" max="3" step="0.1"
+                     value="1" class="range" />
+            </label>
+
+            <label class="field">
+              <span class="field-label">Difficulty</span>
+              <select id="cfgDifficulty" class="input">
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+              </select>
+            </label>
+
+            <label class="field field--check">
+              <input id="cfgSound" type="checkbox" checked />
+              <span>Enable sound effects</span>
+            </label>
+          </fieldset>
+
+          <!-- Danger zone -->
+          <fieldset class="fieldset fieldset--danger">
+            <legend>Maintenance</legend>
+            <button id="btnResetSettings" class="btn btn--danger">
+              ♻️ Reset All Settings
+            </button>
+            <button id="btnClearBest" class="btn btn--ghost">
+              🗑️ Clear Best Score
+            </button>
+          </fieldset>
+        </div>
+
+        <div class="panel-foot">
+          <button id="btnSaveSettings" class="btn btn--primary btn--lg">
+            💾 Save Settings
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- ERROR HANDLER UI (toasts + log console)                       -->
+    <!-- ============================================================= -->
+
+    <!-- Toast stack -->
+    <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+
+    <!-- Floating log toggle button -->
+    <button id="btnLogToggle" class="log-toggle" title="Show logs" aria-label="Show logs">
+      🐞 <span id="logBadge" class="log-badge" hidden>0</span>
+    </button>
+
+    <!-- Log console panel -->
+    <div id="logPanel" class="log-panel">
+      <div class="log-head">
+        <span class="log-title">🐞 Debug Console</span>
+        <div class="log-actions">
+          <button id="btnLogClear" class="icon-btn sm" title="Clear">🧹</button>
+          <button id="btnLogClose" class="icon-btn sm" title="Close">✖</button>
+        </div>
+      </div>
+      <div id="logBody" class="log-body"></div>
+    </div>
+
+  </div><!-- /#app -->
+
+  <!-- ============================================================= -->
+  <!-- SCRIPTS — strict load order                                   -->
+  <!-- 1) error handler (arms global hooks first)                    -->
+  <!-- 2) settings (depends on error handler for toasts)             -->
+  <!-- 3) game (depends on both)                                     -->
+  <!-- ============================================================= -->
+  <script src="js/errorHandler.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
