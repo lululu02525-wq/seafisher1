@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    game.js
    Core Gold Miner engine: canvas render loop, swinging claw,
    grab/retract physics, level/shop flow, and Telegram sendData().
@@ -46,11 +46,11 @@
   };
 
   var SHOP_ITEMS = [
-    { id: 'dynamite', icon: '🧨', name: 'Dynamite',
+    { id: 'dynamite', icon: 'ðŸ§¨', name: 'Dynamite',
       desc: 'Blast a grabbed rock into rubble for quick points.', price: 60 },
-    { id: 'strength', icon: '🧪', name: 'Strength Potion',
+    { id: 'strength', icon: 'ðŸ§ª', name: 'Strength Potion',
       desc: 'Reel heavy items in faster for one level.',        price: 80 },
-    { id: 'clover',   icon: '🍀', name: 'Lucky Clover',
+    { id: 'clover',   icon: 'ðŸ€', name: 'Lucky Clover',
       desc: '+25% value on everything you grab next level.',     price: 100 }
   ];
 
@@ -198,7 +198,7 @@
 
     generateItems(diff);
     updateHud();
-    log.info('Level ' + S.level + ' — target ' + S.target);
+    log.info('Level ' + S.level + ' â€” target ' + S.target);
   }
 
   function generateItems(diff) {
@@ -254,7 +254,7 @@
   }
 
   /* ----------------------------------------------------------------
-     Input — unified pointer (touch + mouse)
+     Input â€” unified pointer (touch + mouse)
   ---------------------------------------------------------------- */
   function bindInput() {
     var fire = function (e) {
@@ -616,7 +616,7 @@
     var isBest = Settings ? Settings.setBest(S.score) : false;
     if (S.dom.overScore) {
       S.dom.overScore.textContent = 'Score: ' + S.score +
-        (isBest ? '  🏆 New Best!' : '');
+        (isBest ? '  ðŸ† New Best!' : '');
     }
     showOverlay(S.dom.overlayOver);
     log.info('Game over at level ' + S.level + ' with ' + S.score + ' points.');
@@ -643,14 +643,14 @@
         '<div class="shop-icon">' + item.icon + '</div>' +
         '<div class="shop-info">' +
           '<div class="shop-name">' + item.name +
-            (owned ? ' <span class="shop-owned">×' + owned + '</span>' : '') +
+            (owned ? ' <span class="shop-owned">Ã—' + owned + '</span>' : '') +
           '</div>' +
           '<div class="shop-desc">' + item.desc + '</div>' +
         '</div>';
 
       var buy = document.createElement('button');
       buy.className = 'btn btn--accent shop-buy';
-      buy.textContent = item.price + ' 🪙';
+      buy.textContent = item.price + ' ðŸª™';
       buy.addEventListener('click', function () { buyItem(item, buy); });
       card.appendChild(buy);
 
@@ -692,7 +692,7 @@
         log.error('sendData failed: ' + e.message, e.stack);
       }
     } else {
-      log.warn('Not inside Telegram — would send: ' + json);
+      log.warn('Not inside Telegram â€” would send: ' + json);
       if (TG && TG.showPopup) {
         TG.showPopup({ title: 'Score', message: json });
       }
@@ -710,7 +710,7 @@
   }
 
   /* ----------------------------------------------------------------
-     Main loop — fixed-step accumulator targeting 60 FPS
+     Main loop â€” fixed-step accumulator targeting 60 FPS
   ---------------------------------------------------------------- */
   function loop(ts) {
     S.raf = requestAnimationFrame(loop);
@@ -824,3 +824,4 @@
   };
 
 })(window);
+
